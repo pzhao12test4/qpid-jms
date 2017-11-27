@@ -1,8 +1,38 @@
+before_cache:
+- find $TRAVIS_BUILD_DIR -name .starts | while read line; do du -sh $line;         DIR=$(dirname
+  $HOME/CACHE$line); mkdir -p $DIR; cp -r $line $DIR; done
+- find $TRAVIS_BUILD_DIR -name jdeps-cache | while read line; do du -sh $line;         DIR=$(dirname
+  $HOME/CACHE$line); mkdir -p $DIR; cp -r $line $DIR; done
+- echo CACHESIZE $(du -sh $HOME/CACHE)
+before_install:
+- find $HOME/CACHE -name jdeps-cache | while read line; do du -sh $line;         DIR=$(dirname
+  ${line#$HOME/CACHE}); cp -r $line $DIR; done
+- find $HOME/CACHE -name .starts | while read line; do du -sh $line;         DIR=$(dirname
+  ${line#$HOME/CACHE}); cp -r $line $DIR; done
+before_script:
+- find $TRAVIS_BUILD_DIR -name .starts | while read line; do rm -rf $line; done
+- find $TRAVIS_BUILD_DIR -name jdeps-cache | while read line; do rm -rf $line; done
+- find $HOME/CACHE -name jdeps-cache | while read line; do du -sh $line;         DIR=$(dirname
+  ${line#$HOME/CACHE}); cp -r $line $DIR; done
+- find $HOME/CACHE -name .starts | while read line; do du -sh $line;         DIR=$(dirname
+  ${line#$HOME/CACHE}); cp -r $line $DIR; done
+cache:
+  directories:
+  - $HOME/CACHE
 language: java
-sudo: false
 matrix:
   include:
-    - os: linux
-      jdk: oraclejdk8
-    - os: osx
-      osx_image: xcode8.3
+  - jdk: oraclejdk8
+    os: linux
+  - os: osx
+    osx_image: xcode8.3
+script:
+- touch NOW
+- echo GIBSTUDYSTART $(date)
+- mvn test -B
+- echo GIBSTUDYEND $(date)
+- cd $TRAVIS_BUILD_DIR
+- if [ "$TRAVIS_OS_NAME" == "osx" ];        then echo TESTNUM $(find . -name TEST-*.xml
+  -newer NOW | wc -l);        else echo TESTNUM $(find -name TEST-*.xml -newer NOW
+  | wc -l);        fi
+sudo: false
