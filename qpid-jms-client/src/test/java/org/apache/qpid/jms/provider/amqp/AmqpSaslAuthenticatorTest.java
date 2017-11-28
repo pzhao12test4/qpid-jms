@@ -33,7 +33,6 @@ import java.util.Deque;
 import java.util.Map;
 import java.util.function.Function;
 
-import javax.jms.JMSSecurityRuntimeException;
 import javax.security.sasl.SaslException;
 
 import org.apache.qpid.jms.sasl.Mechanism;
@@ -60,23 +59,8 @@ public class AmqpSaslAuthenticatorTest {
     }
 
     @Test
-    public void testNullSaslMechanismReturnedErroneously() throws Exception {
-        Function<String[], Mechanism> mechanismFunction = mechanismName -> null;
-
-        AmqpSaslAuthenticator authenticator = new AmqpSaslAuthenticator(sasl, mechanismFunction);
-        authenticator.tryAuthenticate();
-
-        assertTrue(authenticator.isComplete());
-        assertFalse(authenticator.wasSuccessful());
-        assertNotNull(authenticator.getFailureCause());
-        assertTrue(authenticator.getFailureCause().getMessage().startsWith("Exception while processing SASL init:"));
-    }
-
-    @Test
     public void testNoSaslMechanismAgreed() throws Exception {
-        Function<String[], Mechanism> mechanismFunction = mechanismName -> {
-            throw new JMSSecurityRuntimeException("reasons");
-        };
+        Function<String[], Mechanism> mechanismFunction = mechanismName -> null;
 
         AmqpSaslAuthenticator authenticator = new AmqpSaslAuthenticator(sasl, mechanismFunction);
         authenticator.tryAuthenticate();
